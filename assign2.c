@@ -1,3 +1,11 @@
+/* 
+   Source file: assign2.c
+   Project: Assignment 2
+   Author: Ruben C Ortiz
+   Course: CS 6353 - Unix and Network Security 
+   Professor: Dr. Ali Tosun
+*/ 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
