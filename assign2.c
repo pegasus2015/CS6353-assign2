@@ -1,9 +1,10 @@
 /* 
-   Source file: assign2.c
+   Source file name: assign2.c
    Project: Assignment 2
    Author: Ruben C Ortiz
    Course: CS 6353 - Unix and Network Security 
    Professor: Dr. Ali Tosun
+   Date: 7/3/2019
 */ 
 
 #include <stdio.h>
