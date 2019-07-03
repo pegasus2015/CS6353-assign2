@@ -1,6 +1,8 @@
 /* 
    Source file name: assign2.c
    Project: Assignment 2
+   Description: Bruteforce matching of an MD5 digest and prefix value from user input.
+   Reference(s): https://openssl.org/docs/man1.0.2/man3/EVP_DigestInit.html
    Author: Ruben C Ortiz
    Course: CS 6353 - Unix and Network Security 
    Professor: Dr. Ali Tosun
@@ -12,13 +14,13 @@
 #include <time.h>
 #include <openssl/ssl.h>
 
-/* function definitions */
-void getNumBytes(int *num_bytes);
-void getByteValues(int *nums, int num_bytes);
+/* function declarations */
+void getNumBytes(int *numbytes);
+void getByteValues(int *nums, int numbytes);
 void buildRandomString(unsigned char *str);
-int  createHash(const char *message, unsigned char *md_value, int *md_len);
+int  createHash(const char *message, unsigned char *mdvalue, int *mdlen);
 void printMessage(const unsigned char* message, const int len);
-void printHash(const unsigned char *hashstring, const int md_len);
+void printHash(const unsigned char *hashstring, const int mdlen);
 int  searchHash(const unsigned char *hash, int len, const int *prefix, int plen);
 void printPrefix(const int *prefix, int numbytes);
 void checkArrays(const unsigned char *hash, int len, const int *prefix, int numbytes);
@@ -31,30 +33,29 @@ int main(int argc, char *argv[]){
    const int MSG_LEN = 20;
    
    // Result of Hash search   
-   //int res;
    int notfound;
    double runs;
 
    // User input vars
-   int num_bytes; // number of bytes to match hash digest
+   int numbytes; // number of bytes to match hash digest
    int c; // char from user input  
    
    // Message array
    unsigned char message[MSG_LEN];    
    
    // Hash variables
-   unsigned char md_value[EVP_MAX_MD_SIZE]; // hash array
-   int md_len; // hash length
+   unsigned char mdvalue[EVP_MAX_MD_SIZE]; // hash array
+   int mdlen; // hash length
 
-   getNumBytes(&num_bytes);
+   getNumBytes(&numbytes);
  
    // Array to store byte values
-   int prefix[num_bytes]; 
+   int prefix[numbytes]; 
    
-   getByteValues(prefix, num_bytes);
+   getByteValues(prefix, numbytes);
    
    printf("TargetDigestPrefix in hexadecimal\n"); 
-   printPrefix(prefix, num_bytes);
+   printPrefix(prefix, numbytes);
    printf("\n");
    
    notfound = 1; // set flag variable for loop
@@ -65,10 +66,10 @@ int main(int argc, char *argv[]){
       buildRandomString(message);
    
       // Hash the message
-      createHash(message, md_value, &md_len);   
+      createHash(message, mdvalue, &mdlen);   
     
       // Perform a search
-      notfound = searchHash(md_value, md_len, prefix, num_bytes);   
+      notfound = searchHash(mdvalue, mdlen, prefix, numbytes);   
                 
       runs++;
    }
@@ -79,8 +80,11 @@ int main(int argc, char *argv[]){
    printf("Message in hexadecimal format\n");
    printMessage(message, MSG_LEN);
    printf("MD5 Message Digest in hexadecimal format\n"); 
-   printHash(md_value, md_len);   
-   printf("\n");
+   printHash(mdvalue, mdlen);   
+   printf("\n");   
+   
+   EVP_cleanup();
+   
    return 0;
 } // end of main
 
@@ -101,7 +105,7 @@ int searchHash(const unsigned char *hash, int len, const int *prefix, int numbyt
    
 } // end of searchHash function
 
-void getNumBytes(int *num_bytes){
+void getNumBytes(int *numbytes){
    
    int c; // char from user input
    
@@ -109,18 +113,18 @@ void getNumBytes(int *num_bytes){
    printf("Enter Number of Bytes to Match\n");
 
    // Get user input for number of bytes
-   scanf("%d", num_bytes);
+   scanf("%d", numbytes);
 
    // Get whitespace char
    c = getchar();    
 } // end of getNumBytes function
 
-void getByteValues(int *nums, int num_bytes){
+void getByteValues(int *nums, int numbytes){
    int c;
    
-   printf("Enter the byte values to match for %d bytes\n", num_bytes);
+   printf("Enter the byte values to match for %d bytes\n", numbytes);
    
-   for (int i = 0; i < num_bytes; i++){
+   for (int i = 0; i < numbytes; i++){
       scanf("%d", &c);
       nums[i] = c;
       c = getchar(); // get whitespace char      
@@ -137,11 +141,8 @@ void buildRandomString(unsigned char * str){
    str[20] = '\0';
 } // end of buildRandomString function
 
-int createHash(const char* message, unsigned char* md_value, int* md_len){
+int createHash(const char *message, unsigned char *mdvalue, int *mdlen){
    EVP_MD_CTX *mdctx;
-   unsigned char **digest;
-   unsigned int *digest_len; // move to main
-   size_t message_len; 
       
    if ((mdctx = EVP_MD_CTX_create()) == NULL){
       printf("Error init in CTX.");
@@ -155,7 +156,7 @@ int createHash(const char* message, unsigned char* md_value, int* md_len){
       printf("Error in Digest Update!");
       return -1;
    }
-   EVP_DigestFinal_ex(mdctx, md_value, md_len); 
+   EVP_DigestFinal_ex(mdctx, mdvalue, mdlen); 
    EVP_MD_CTX_destroy(mdctx);
 
 } // end of createHash function
@@ -169,9 +170,9 @@ void printMessage(const unsigned char* message, int len){
    printf("\n");
 } // end of printMessage function
 
-void printHash(const unsigned char* hashstring, const int md_len){
+void printHash(const unsigned char* hashstring, const int mdlen){
    int i;
-   for (i = 0; i < md_len; i++){
+   for (i = 0; i < mdlen; i++){
       printf("%02x", hashstring[i]);
    }
    printf("\n");
